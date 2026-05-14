@@ -5,6 +5,10 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import CrudPage from './pages/CrudPage';
 import AIAdvisor from './pages/AIAdvisor';
+import AIReports from './pages/AIReports';
+import Batch03Features from './pages/Batch03Features';
+
+import Extensions from './pages/Extensions'; // Apply pass 5
 
 const features = [
   { key: 'wills', path: '/wills', label: 'Will Drafting', icon: '📜', color: 'var(--accent)', api: '/wills', ai: true,
@@ -226,6 +230,12 @@ function Sidebar() {
         <Link to="/ai-advisor" className={location.pathname === '/ai-advisor' ? 'active' : ''}>
           <span>🤖</span> AI Estate Advisor
         </Link>
+        <Link to="/ai-reports" className={location.pathname === '/ai-reports' ? 'active' : ''}>
+          <span>📑</span> AI Reports
+        </Link>
+        <Link to="/extensions" className={location.pathname === '/extensions' ? 'active' : ''}>
+          <span>🧩</span> Extensions
+        </Link>
         {navSections.map(section => (
           <React.Fragment key={section.title}>
             <div className="nav-section">{section.title}</div>
@@ -267,6 +277,7 @@ function App() {
   return (
     <Router>
       <Routes>
+          <Route path="/batch03" element={<Batch03Features />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -276,6 +287,16 @@ function App() {
         <Route path="/ai-advisor" element={
           <ProtectedRoute>
             <AppLayout><AIAdvisor /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/ai-reports" element={
+          <ProtectedRoute>
+            <AppLayout><AIReports /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/extensions" element={
+          <ProtectedRoute>
+            <AppLayout><Extensions /></AppLayout>
           </ProtectedRoute>
         } />
         {features.map(f => (
