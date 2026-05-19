@@ -16,8 +16,23 @@ const pool = require('./db');
 const app = express();
 const PORT = process.env.BACKEND_PORT || 4000;
 
-// CORS - use CLIENT_URL env var
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+// CORS - use CLIENT_URL env var; allow common localhost dev ports too.
+const _allowedOrigins = new Set([
+  process.env.CLIENT_URL,
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3055',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+  'http://127.0.0.1:3055',
+].filter(Boolean));
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (_allowedOrigins.has(origin)) return cb(null, true);
+    return cb(null, false);
+  },
+}));
 app.use(express.json({ limit: '10mb' }));
 
 // Ensure uploads directory exists
@@ -258,6 +273,9 @@ app.use('/api/family-meeting-coordinator', authenticateToken, require('./routes/
 app.use('/api/life-expectancy-planner', authenticateToken, require('./routes/lifeExpectancyPlanner'));
 app.use('/api/beneficiary-portal', require('./routes/beneficiaryPortal'));
 app.use('/api/international-planning', authenticateToken, require('./routes/internationalPlanning'));
+
+// Custom Views (Estate Views) — VIZ + NON-VIZ surfaces. Mounted BEFORE 404/error.
+app.use('/api/custom-views', authenticateToken, require('./routes/customViews'));
 
 // Error handler
 app.use((err, req, res, next) => {

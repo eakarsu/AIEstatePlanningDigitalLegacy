@@ -9,6 +9,7 @@ import AIReports from './pages/AIReports';
 import Batch03Features from './pages/Batch03Features';
 
 import Extensions from './pages/Extensions'; // Apply pass 5
+import CustomViewsPage from './pages/CustomViewsPage';
 
 const features = [
   { key: 'wills', path: '/wills', label: 'Will Drafting', icon: '📜', color: 'var(--accent)', api: '/wills', ai: true,
@@ -236,6 +237,9 @@ function Sidebar() {
         <Link to="/extensions" className={location.pathname === '/extensions' ? 'active' : ''}>
           <span>🧩</span> Extensions
         </Link>
+        <Link to="/custom-views" className={location.pathname === '/custom-views' ? 'active' : ''}>
+          <span>🗂️</span> Estate Views
+        </Link>
         {navSections.map(section => (
           <React.Fragment key={section.title}>
             <div className="nav-section">{section.title}</div>
@@ -297,6 +301,11 @@ function App() {
         <Route path="/extensions" element={
           <ProtectedRoute>
             <AppLayout><Extensions /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/custom-views" element={
+          <ProtectedRoute>
+            <AppLayout><CustomViewsPage /></AppLayout>
           </ProtectedRoute>
         } />
         {features.map(f => (
