@@ -273,6 +273,7 @@ app.use('/api/family-meeting-coordinator', authenticateToken, require('./routes/
 app.use('/api/life-expectancy-planner', authenticateToken, require('./routes/lifeExpectancyPlanner'));
 app.use('/api/beneficiary-portal', require('./routes/beneficiaryPortal'));
 app.use('/api/international-planning', authenticateToken, require('./routes/internationalPlanning'));
+app.use('/api/executor-access-packet', authenticateToken, require('./routes/executorAccessPacket'));
 
 // Custom Views (Estate Views) — VIZ + NON-VIZ surfaces. Mounted BEFORE 404/error.
 app.use('/api/custom-views', authenticateToken, require('./routes/customViews'));

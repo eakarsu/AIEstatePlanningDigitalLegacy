@@ -10,6 +10,12 @@ import Batch03Features from './pages/Batch03Features';
 
 import Extensions from './pages/Extensions'; // Apply pass 5
 import CustomViewsPage from './pages/CustomViewsPage';
+import ExecutorAccessPacket from './pages/ExecutorAccessPacket';
+
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
+
+import TimelineView from './pages/TimelineView';
 
 const features = [
   { key: 'wills', path: '/wills', label: 'Will Drafting', icon: '📜', color: 'var(--accent)', api: '/wills', ai: true,
@@ -240,6 +246,9 @@ function Sidebar() {
         <Link to="/custom-views" className={location.pathname === '/custom-views' ? 'active' : ''}>
           <span>🗂️</span> Estate Views
         </Link>
+        <Link to="/executor-access-packet" className={location.pathname === '/executor-access-packet' ? 'active' : ''}>
+          <span>🗝️</span> Executor Packet
+        </Link>
         {navSections.map(section => (
           <React.Fragment key={section.title}>
             <div className="nav-section">{section.title}</div>
@@ -281,6 +290,10 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/insights/timeline" element={<ProtectedRoute><TimelineView /></ProtectedRoute>} />
+        <Route path="/codex/custom-viz" element={<ProtectedRoute><CodexCustomVizFeature /></ProtectedRoute>} />
+        <Route path="/codex/operations" element={<ProtectedRoute><CodexOperationsFeature /></ProtectedRoute>} />
+
           <Route path="/batch03" element={<Batch03Features />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={
@@ -306,6 +319,11 @@ function App() {
         <Route path="/custom-views" element={
           <ProtectedRoute>
             <AppLayout><CustomViewsPage /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/executor-access-packet" element={
+          <ProtectedRoute>
+            <AppLayout><ExecutorAccessPacket /></AppLayout>
           </ProtectedRoute>
         } />
         {features.map(f => (
