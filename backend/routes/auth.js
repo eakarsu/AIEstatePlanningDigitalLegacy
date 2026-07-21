@@ -5,7 +5,10 @@ const pool = require('../db');
 const router = express.Router();
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 
-const JWT_SECRET = process.env.JWT_SECRET || 'estate-planning-secret-key-2024';
+function jwtSecret() {
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) throw new Error('JWT_SECRET must be configured with at least 32 characters');
+  return process.env.JWT_SECRET;
+}
 
 router.post('/login', async (req, res) => {
   try {
@@ -19,8 +22,8 @@ router.post('/login', async (req, res) => {
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: user.id, email: user.email, full_name: user.full_name }, JWT_SECRET, { expiresIn: '24h' });
-    res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name } });
+    const token = jwt.sign({ id: user.id, email: user.email, full_name: user.full_name, role: user.role || 'client', attorneyLicensed: user.attorney_license_verified === true }, jwtSecret(), { expiresIn: '24h' });
+    res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role || 'client' } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -35,7 +38,7 @@ router.post('/register', async (req, res) => {
       [email, hashedPassword, full_name]
     );
     const user = result.rows[0];
-    const token = jwt.sign({ id: user.id, email: user.email, full_name: user.full_name }, JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ id: user.id, email: user.email, full_name: user.full_name, role: 'client', attorneyLicensed: false }, jwtSecret(), { expiresIn: '24h' });
     res.status(201).json({ token, user });
   } catch (err) {
     if (err.code === '23505') {

@@ -51,19 +51,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } }); // 20MB limit
 
-// Run one-time DB migrations on startup
-async function runMigrations() {
-  try {
-    await pool.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS jurisdiction VARCHAR(100)
-    `);
-    console.log('Migration: jurisdiction column ensured on users table.');
-  } catch (err) {
-    console.error('Migration error:', err.message);
-  }
-}
-runMigrations();
-
 // Public routes
 app.use('/api/auth', authRoutes);
 
@@ -274,6 +261,7 @@ app.use('/api/life-expectancy-planner', authenticateToken, require('./routes/lif
 app.use('/api/beneficiary-portal', require('./routes/beneficiaryPortal'));
 app.use('/api/international-planning', authenticateToken, require('./routes/internationalPlanning'));
 app.use('/api/executor-access-packet', authenticateToken, require('./routes/executorAccessPacket'));
+app.use('/api/governed-matters', authenticateToken, require('./routes/governedMatters'));
 
 // Custom Views (Estate Views) — VIZ + NON-VIZ surfaces. Mounted BEFORE 404/error.
 app.use('/api/custom-views', authenticateToken, require('./routes/customViews'));
@@ -284,13 +272,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error', message: err.message });
 });
 
-
-// === Batch 03 Gaps & Frontend Mounts ===
-try {
-  const _batch03 = require('./routes/batch03Gaps');
-  if (typeof authenticateToken === 'function') app.use('/api', authenticateToken, _batch03);
-  else app.use('/api', _batch03);
-} catch (_e) { /* batch03 gap routes optional */ }
 
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);

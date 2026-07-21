@@ -1,0 +1,5 @@
+'use strict';
+const test = require('node:test'); const assert = require('node:assert/strict'); const { validateMatter, assertTransition } = require('../domain/matterPolicy');
+test('matter checks rule provenance and beneficiary consistency', () => { const r = validateMatter({ jurisdiction: 'US-NY', ruleVersion: '2026-1', ruleEffectiveAt: '2026-01-01', assets: [{ owner: 'client' }], beneficiaries: [{ name: 'A', sharePct: 60 }, { name: 'B', sharePct: 40 }] }, new Date('2026-02-01')); assert.equal(r.valid, true); assert.equal(r.legalAdvice, false); });
+test('future rules are rejected', () => assert.throws(() => validateMatter({ jurisdiction: 'X', ruleVersion: '1', ruleEffectiveAt: '2027-01-01' }, new Date('2026-01-01')), /future/));
+test('approval and execution have professional gates', () => { assert.throws(() => assertTransition('draft_review', 'attorney_approved', { role: 'client' }), /attorney/); assert.throws(() => assertTransition('execution_pending', 'executed', {}), /evidence/); });

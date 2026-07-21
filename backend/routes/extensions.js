@@ -111,7 +111,8 @@ function aiUnavailable(res) {
 // document row to flag KMS rotation later. This is NOT production-grade
 // crypto without a real KMS — it is a stand-in suitable for dev/demo.
 function deriveVaultKey() {
-  const seed = process.env.JWT_SECRET || 'estate-planning-secret-key-2024';
+  const seed = process.env.JWT_SECRET;
+  if (!seed || seed.length < 32) throw new Error('JWT_SECRET must be configured before vault access');
   return crypto.createHash('sha256').update('vault-pass5:' + seed).digest();
 }
 function encryptVault(plaintext) {
