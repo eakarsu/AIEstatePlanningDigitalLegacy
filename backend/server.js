@@ -18,6 +18,7 @@ const PORT = process.env.BACKEND_PORT || 4000;
 
 // CORS - use CLIENT_URL env var; allow common localhost dev ports too.
 const _allowedOrigins = new Set([
+  ...(process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || '').split(',').map(origin => origin.trim()).filter(Boolean),
   process.env.CLIENT_URL,
   'http://localhost:3000',
   'http://localhost:3001',

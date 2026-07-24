@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
+const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 
@@ -45,6 +46,19 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already exists' });
     }
     res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/me', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, full_name, created_at FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ error: 'User not found' });
+    return res.json({ user: result.rows[0] });
+  } catch (_error) {
+    return res.status(503).json({ error: 'Authentication service unavailable' });
   }
 });
 
