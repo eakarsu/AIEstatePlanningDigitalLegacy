@@ -58,7 +58,7 @@ export default function LoginPage() {
         <div className="divider">or</div>
 
         <button onClick={fillDemo} className="btn-demo">
-          Auto-Fill Demo Credentials
+          Auto Fill Demo Credentials
         </button>
 
         <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: 'var(--text-muted)' }}>
