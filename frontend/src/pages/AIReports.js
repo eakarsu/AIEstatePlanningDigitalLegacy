@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import api from '../services/api';
+import AIResultView from './AIResultView';
 
 // Wires the three AI endpoints in backend/routes/aiNew.js that previously
 // had no FE entrypoint:
@@ -138,43 +138,13 @@ export default function AIReports() {
         </div>
       )}
 
-      {currentResult && (
-        <div className="ai-output">
-          <div className="ai-output-header">
-            <span className="ai-badge">{active.label}</span>
-            {currentResult.model && <span className="ai-model">Model: {currentResult.model}</span>}
-            {currentResult.beneficiary_count !== undefined && (
-              <span className="ai-model">Beneficiaries: {currentResult.beneficiary_count}</span>
-            )}
-            {currentResult.message_count !== undefined && (
-              <span className="ai-model">Messages: {currentResult.message_count}</span>
-            )}
-            {currentResult.summary && currentResult.summary.total !== undefined && (
-              <span className="ai-model">
-                Total: {currentResult.summary.total} · Overdue: {currentResult.summary.overdue} · At-risk: {currentResult.summary.at_risk}
-              </span>
-            )}
-            {currentResult.summary && currentResult.summary.gross_estate_estimate !== undefined && (
-              <span className="ai-model">
-                Gross Estate: ${Number(currentResult.summary.gross_estate_estimate).toLocaleString()}
-              </span>
-            )}
-            {currentResult.summary && currentResult.summary.beneficiary_count !== undefined && (
-              <span className="ai-model">
-                Beneficiaries: {currentResult.summary.beneficiary_count} · Total Share: {Number(currentResult.summary.total_share_pct || 0).toFixed(1)}%
-              </span>
-            )}
-            {currentResult.jurisdiction && (
-              <span className="ai-model">Jurisdiction: {currentResult.jurisdiction}</span>
-            )}
-          </div>
-          <div className="ai-output-content">
-            <ReactMarkdown>
-              {currentResult[active.contentField] || JSON.stringify(currentResult, null, 2)}
-            </ReactMarkdown>
-          </div>
-        </div>
-      )}
+      <AIResultView
+        response={currentResult}
+        title={active.label}
+        label="Generated estate report"
+        model={currentResult?.model}
+        tokens={currentResult?.usage}
+      />
     </div>
   );
 }

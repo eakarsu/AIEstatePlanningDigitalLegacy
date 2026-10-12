@@ -1,25 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import ReactMarkdown from 'react-markdown';
 import api from '../services/api';
+import AIFieldPresets, { completeExample } from './AIFieldPresets';
+import AIResultView from './AIResultView';
+import RecordDialog from '../components/RecordDialog';
 
 function Toast({ message, type, onClose }) {
   useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
   return <div className={`toast toast-${type}`}>{message}</div>;
 }
 
-function AIOutput({ result }) {
-  if (!result) return null;
+function AIOutput({ result, title = 'AI-generated report', label = 'AI generated' }) {
   return (
-    <div className="ai-output">
-      <div className="ai-output-header">
-        <span className="ai-badge">AI Generated</span>
-        <span className="ai-model">Model: {result.model || 'claude-haiku'}</span>
-        {result.usage?.total_tokens && <span className="ai-model">Tokens: {result.usage.total_tokens}</span>}
-      </div>
-      <div className="ai-output-content">
-        <ReactMarkdown>{result.content}</ReactMarkdown>
-      </div>
-    </div>
+    <AIResultView
+      response={result}
+      title={title}
+      label={label}
+      model={result?.model}
+      tokens={result?.usage}
+    />
   );
 }
 
@@ -28,60 +26,58 @@ function DetailModal({ item, feature, onClose, onEdit, onDelete }) {
   const displayFields = feature.fields.filter(f => item[f.name] !== undefined && item[f.name] !== null && item[f.name] !== '');
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{item[feature.fields[0]?.name] || 'Details'}</h3>
-          <button className="btn btn-icon btn-secondary" onClick={onClose}>✕</button>
-        </div>
-        <div className="modal-body">
-          <div className="detail-grid">
-            {displayFields.map(f => (
-              <div key={f.name} className="detail-item">
-                <label>{f.label}</label>
-                <span>
-                  {f.name === 'status' ? (
-                    <span className={`status-badge status-${item[f.name]}`}>{item[f.name]}</span>
-                  ) : f.name === 'is_encrypted' ? (
-                    item[f.name] ? 'Yes' : 'No'
-                  ) : f.type === 'number' ? (
-                    typeof item[f.name] === 'number' ? `$${parseFloat(item[f.name]).toLocaleString()}` : item[f.name]
-                  ) : (
-                    String(item[f.name])
-                  )}
-                </span>
-              </div>
-            ))}
-            <div className="detail-item">
-              <label>Created</label>
-              <span>{new Date(item.created_at).toLocaleDateString()}</span>
-            </div>
-            {item.updated_at && (
-              <div className="detail-item">
-                <label>Updated</label>
-                <span>{new Date(item.updated_at).toLocaleDateString()}</span>
-              </div>
-            )}
+    <RecordDialog
+      title={item[feature.fields[0]?.name] || 'Details'}
+      item={item}
+      fields={[]}
+      onClose={onClose}
+      onEdit={onEdit}
+      onDelete={(row) => onDelete(row.id)}
+    >
+      <div className="detail-grid">
+        {displayFields.map(f => (
+          <div key={f.name} className="detail-item">
+            <label>{f.label}</label>
+            <span>
+              {f.name === 'status' ? (
+                <span className={`status-badge status-${item[f.name]}`}>{item[f.name]}</span>
+              ) : f.name === 'is_encrypted' ? (
+                item[f.name] ? 'Yes' : 'No'
+              ) : f.type === 'number' ? (
+                typeof item[f.name] === 'number' ? `$${parseFloat(item[f.name]).toLocaleString()}` : item[f.name]
+              ) : (
+                String(item[f.name])
+              )}
+            </span>
           </div>
-          {(item.content || item.message_content || item.powers_granted || item.wishes || item.description) && (
-            <div style={{ marginTop: '16px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Content</label>
-              <div style={{ background: 'var(--bg-primary)', padding: '16px', borderRadius: '8px', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                {item.content || item.message_content || item.powers_granted || item.wishes || item.description}
-              </div>
-            </div>
-          )}
-          {(item.ai_suggestions || item.ai_content || item.ai_recommendations || item.ai_enhanced_content) && (
-            <AIOutput result={{ content: item.ai_suggestions || item.ai_content || item.ai_recommendations || item.ai_enhanced_content, model: 'Saved AI Content' }} />
-          )}
+        ))}
+        <div className="detail-item">
+          <label>Created</label>
+          <span>{new Date(item.created_at).toLocaleDateString()}</span>
         </div>
-        <div className="modal-footer">
-          <button className="btn btn-danger btn-sm" onClick={() => onDelete(item.id)}>Delete</button>
-          <button className="btn btn-primary btn-sm" onClick={() => onEdit(item)}>Edit</button>
-          <button className="btn btn-secondary btn-sm" onClick={onClose}>Close</button>
-        </div>
+        {item.updated_at && (
+          <div className="detail-item">
+            <label>Updated</label>
+            <span>{new Date(item.updated_at).toLocaleDateString()}</span>
+          </div>
+        )}
       </div>
-    </div>
+      {(item.content || item.message_content || item.powers_granted || item.wishes || item.description) && (
+        <div style={{ marginTop: '16px' }}>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Content</label>
+          <div style={{ background: 'var(--bg-primary)', padding: '16px', borderRadius: '8px', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+            {item.content || item.message_content || item.powers_granted || item.wishes || item.description}
+          </div>
+        </div>
+      )}
+      {(item.ai_suggestions || item.ai_content || item.ai_recommendations || item.ai_enhanced_content) && (
+        <AIOutput
+          result={{ content: item.ai_suggestions || item.ai_content || item.ai_recommendations || item.ai_enhanced_content }}
+          title="Saved AI content"
+          label="Saved result"
+        />
+      )}
+    </RecordDialog>
   );
 }
 
@@ -101,6 +97,17 @@ function FormModal({ item, feature, onClose, onSave, title }) {
     return data;
   });
   const [saving, setSaving] = useState(false);
+  const aiFields = (feature.aiFields || []).map((name) => feature.fields.find((field) => field.name === name)).filter(Boolean);
+  const aiSamples = [
+    { label: 'Simple estate example' },
+    { label: 'Family planning example' },
+    { label: 'Detailed review example' },
+  ];
+
+  const fillAIExample = (sample, index) => {
+    const filled = completeExample(aiFields, sample, index, feature.label, formData);
+    setFormData((current) => ({ ...current, ...filled }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,6 +125,15 @@ function FormModal({ item, feature, onClose, onSave, title }) {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+            {aiFields.length > 0 && (
+              <AIFieldPresets
+                fields={aiFields}
+                samples={aiSamples}
+                onFill={fillAIExample}
+                disabled={saving}
+                context={feature.label}
+              />
+            )}
             {feature.fields.map(f => (
               <div key={f.name} className="form-group">
                 <label>{f.label} {f.required && '*'}</label>
@@ -314,7 +330,7 @@ export default function CrudPage({ feature }) {
             </thead>
             <tbody>
               {filteredItems.map((item, idx) => (
-                <tr key={item.id} onClick={() => handleRowClick(item)}>
+                <tr key={item.id} onClick={() => handleRowClick(item)} tabIndex={0} onKeyDown={(event) => { if ((event.key === 'Enter' || event.key === ' ') && event.target === event.currentTarget) { event.preventDefault(); (() => handleRowClick(item))(event); } }}>
                   <td style={{ color: 'var(--text-muted)' }}>{idx + 1}</td>
                   {feature.columns.map(col => (
                     <td key={col}>{formatCell(item, col)}</td>

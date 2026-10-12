@@ -2,6 +2,7 @@
 // Auto-generated frontend page (lean v0). Wires Custom Feature Suggestions
 // and Gap endpoints (AI counterparts + non-AI features) to backend routes.
 import React, { useState } from 'react';
+import AIResultView from './AIResultView';
 
 const API_BASE = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL) || 'http://localhost:4000/api';
 
@@ -36,18 +37,33 @@ export default function Batch03Features() {
   const [error, setError] = useState(null);
 
   const sampleRequests = [
-      {
-          "label": "Scenario",
-          "value": "Run Batch03 Features for a realistic customer case.\nContext: a team needs a practical recommendation based on incomplete operating data.\nGoal: identify the best action, key risks, missing information, and expected business impact.\nReturn: summary, prioritized action plan, assumptions, and follow-up questions."
-      },
-      {
-          "label": "Data sample",
-          "value": "Analyze this Batch03 Features data sample.\nInput records:\n- Record 1: urgent, customer impact high, owner unassigned\n- Record 2: medium priority, blocked by missing data\n- Record 3: recurring issue, automation opportunity\nReturn structured findings, anomalies, recommendations, and confidence."
-      },
-      {
-          "label": "Executive review",
-          "value": "Prepare an executive review for Batch03 Features.\nAudience: business owner, operations lead, and implementation team.\nInclude impact, risk, estimated effort, decision points, and a concise next-step plan."
-      }
+    {
+      label: 'Estate readiness review',
+      value: JSON.stringify({
+        query: 'Review a fictional household estate plan for readiness.',
+        context: 'Married couple, two minor children, home, retirement accounts, life insurance, and digital assets.',
+        goal: 'Identify the highest-priority planning gaps, risks, missing evidence, and next actions.',
+        return_format: 'Executive summary, findings table, prioritized actions, assumptions, and follow-up questions.',
+      }, null, 2),
+    },
+    {
+      label: 'Digital legacy scenario',
+      value: JSON.stringify({
+        query: 'Assess a fictional digital legacy inventory.',
+        context: 'Cryptocurrency, cloud storage, email, social media, subscriptions, and family photo archives are present.',
+        goal: 'Recommend access, privacy, beneficiary, executor, and continuity steps without inventing credentials.',
+        return_format: 'Risk summary, asset-by-asset table, action list, and professional-review caveats.',
+      }, null, 2),
+    },
+    {
+      label: 'Executive decision brief',
+      value: JSON.stringify({
+        query: 'Prepare an executive estate-planning decision brief for a fictional multi-state estate.',
+        context: 'The family has real estate in two states, a family business, trusts, insurance, and incomplete account documentation.',
+        goal: 'Compare practical options, flag jurisdictional questions, and sequence review work.',
+        return_format: 'Decision summary, options table, risks, owners, timing, and unresolved questions.',
+      }, null, 2),
+    },
   ];
 
   const applySampleRequest = (value) => {
@@ -120,11 +136,11 @@ export default function Batch03Features() {
             </button>
           </div>
           {error && (<div style={{ marginTop: 12, padding: 10, background: '#fee2e2', color: '#991b1b', borderRadius: 4, fontSize: 13 }}>{error}</div>)}
-          {results[current.slug] && (
-            <pre style={{ marginTop: 12, padding: 10, background: '#0b1020', color: '#cbd5e1', borderRadius: 4, overflow: 'auto', maxHeight: 360, fontSize: 12 }}>
-              {typeof results[current.slug] === 'string' ? results[current.slug] : JSON.stringify(results[current.slug], null, 2)}
-            </pre>
-          )}
+          <AIResultView
+            response={results[current.slug]}
+            title={`${current.label} result`}
+            label="Generated feature report"
+          />
         </div>
       )}
     </div>

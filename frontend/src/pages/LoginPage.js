@@ -25,8 +25,11 @@ export default function LoginPage() {
   };
 
   const fillDemo = () => {
-    setEmail(process.env.REACT_APP_DEMO_EMAIL || '');
-    setPassword(process.env.REACT_APP_DEMO_PASSWORD || '');
+    const demoEmail = process.env.REACT_APP_DEMO_EMAIL || 'admin@estateplanning.com';
+    const demoPassword = process.env.REACT_APP_DEMO_PASSWORD || '';
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError(demoPassword ? '' : 'Demo password is not configured for this deployment.');
   };
 
   return (
@@ -57,12 +60,12 @@ export default function LoginPage() {
 
         <div className="divider">or</div>
 
-        <button onClick={fillDemo} className="btn-demo">
-          Auto Fill Demo Credentials
+        <button type="button" onClick={fillDemo} className="btn-demo">
+          Fill Demo Credentials
         </button>
 
         <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: 'var(--text-muted)' }}>
-          Click "Auto-Fill" then "Sign In" to access the demo
+          Uses the existing seeded demo account configured by the local start script.
         </p>
       </div>
     </div>

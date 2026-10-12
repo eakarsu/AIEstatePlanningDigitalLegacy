@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
 import api from '../services/api';
+import AIFieldPresets, { completeExample } from './AIFieldPresets';
+import AIResultView from './AIResultView';
+
+const ADVISOR_FIELDS = [
+  { name: 'question', label: 'Estate planning question', type: 'textarea', required: true },
+];
+
+const ADVISOR_PRESETS = [
+  { label: 'Digital legacy review', question: 'Review a fictional estate with cryptocurrency, cloud storage, social accounts, and family photo archives. Explain a practical digital-asset inventory, access, beneficiary, privacy, and executor plan, including questions for licensed counsel.' },
+  { label: 'Family protection plan', question: 'For a fictional married couple with two minor children, a primary residence, retirement accounts, and life insurance, outline the will, guardianship, beneficiary, trust, and annual review decisions they should discuss with licensed professionals.' },
+  { label: 'Executor readiness audit', question: 'Create a detailed executor-readiness checklist for a fictional multi-state estate. Cover documents, account access, asset valuation, deadlines, communications, tax coordination, digital legacy, and unresolved information without treating the example as legal advice.' },
+];
 
 export default function AIAdvisor() {
   const [question, setQuestion] = useState('');
@@ -75,8 +86,15 @@ export default function AIAdvisor() {
         <>
           <div className="card" style={{ marginBottom: '24px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>Ask the AI Estate Advisor</h3>
+            <AIFieldPresets
+              fields={ADVISOR_FIELDS}
+              samples={ADVISOR_PRESETS}
+              disabled={loading}
+              context="AI estate advisor"
+              onFill={(sample, index) => setQuestion(completeExample(ADVISOR_FIELDS, sample, index, 'AI estate advisor', { question }).question)}
+            />
             <form onSubmit={askQuestion}>
-              <textarea
+              <textarea data-ai-field={"question"}
                 className="form-control"
                 placeholder="Ask any estate planning question..."
                 value={question}
@@ -103,31 +121,22 @@ export default function AIAdvisor() {
           </div>
 
           {loading && <div className="loading-spinner"><div className="spinner"></div>AI is analyzing your question...</div>}
-          {result && (
-            <div className="ai-output">
-              <div className="ai-output-header">
-                <span className="ai-badge">AI Estate Advisor</span>
-                <span className="ai-model">Model: {result.model}</span>
-                {result.usage?.total_tokens && <span className="ai-model">Tokens: {result.usage.total_tokens}</span>}
-              </div>
-              <div className="ai-output-content">
-                <ReactMarkdown>{result.content}</ReactMarkdown>
-              </div>
-            </div>
-          )}
+          <AIResultView
+            response={result}
+            title="Estate advisor response"
+            label="AI Estate Advisor"
+            model={result?.model}
+            tokens={result?.usage}
+          />
 
           {summaryLoading && <div className="loading-spinner"><div className="spinner"></div>Generating comprehensive estate summary...</div>}
-          {summary && (
-            <div className="ai-output" style={{ marginTop: '24px' }}>
-              <div className="ai-output-header">
-                <span className="ai-badge">Estate Plan Summary</span>
-                <span className="ai-model">Model: {summary.model}</span>
-              </div>
-              <div className="ai-output-content">
-                <ReactMarkdown>{summary.content}</ReactMarkdown>
-              </div>
-            </div>
-          )}
+          <AIResultView
+            response={summary}
+            title="Estate plan summary"
+            label="Portfolio report"
+            model={summary?.model}
+            tokens={summary?.usage}
+          />
         </>
       )}
 
@@ -148,15 +157,12 @@ export default function AIAdvisor() {
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                   <strong>Prompt:</strong> {h.prompt?.substring(0, 200)}{h.prompt?.length > 200 ? '...' : ''}
                 </div>
-                <div className="ai-output" style={{ margin: 0 }}>
-                  <div className="ai-output-header">
-                    <span className="ai-badge">AI Response</span>
-                    <span className="ai-model">{h.model}</span>
-                  </div>
-                  <div className="ai-output-content">
-                    <ReactMarkdown>{h.response}</ReactMarkdown>
-                  </div>
-                </div>
+                <AIResultView
+                  response={h.response}
+                  title={h.feature.replace(/_/g, ' ')}
+                  label="Saved AI response"
+                  model={h.model}
+                />
               </div>
             ))
           )}
